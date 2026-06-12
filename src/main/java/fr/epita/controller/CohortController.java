@@ -18,8 +18,9 @@ public class CohortController {
     private final CohortService cohortService;
 
     @GetMapping
-    public ResponseEntity<List<CohortResponse>> getAll() {
-        return ResponseEntity.ok(cohortService.getAll());
+    public ResponseEntity<List<CohortResponse>> getAll(
+            @RequestParam(required = false) Long universityId) {
+        return ResponseEntity.ok(cohortService.getAll(universityId));
     }
 
     @PostMapping
@@ -32,12 +33,6 @@ public class CohortController {
             @PathVariable Long id,
             @Valid @RequestBody CreateCohortRequest request) {
         return ResponseEntity.ok(cohortService.update(id, request));
-    }
-
-    @PatchMapping("/{id}/archive")
-    public ResponseEntity<Void> archive(@PathVariable Long id) {
-        cohortService.archive(id);
-        return ResponseEntity.ok().build();
     }
 }
 

@@ -4,6 +4,8 @@ import fr.epita.enums.LecturerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -26,9 +28,18 @@ public class Lecturer {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @ManyToOne
-    @JoinColumn(name = "programme_id", nullable = false)
-    private Programme programme;
+    @Column(unique = true)
+    private String lecturerRef;
+
+    private String password;
+
+    @ManyToMany
+    @JoinTable(
+            name = "lecturer_programmes",
+            joinColumns = @JoinColumn(name = "lecturer_id"),
+            inverseJoinColumns = @JoinColumn(name = "programme_id")
+    )
+    private List<Programme> programmes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

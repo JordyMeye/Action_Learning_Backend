@@ -18,8 +18,9 @@ public class LecturerController {
     private final LecturerService lecturerService;
 
     @GetMapping
-    public ResponseEntity<List<LecturerResponse>> getAll() {
-        return ResponseEntity.ok(lecturerService.getAll());
+    public ResponseEntity<List<LecturerResponse>> getAll(
+            @RequestParam(required = false) Long universityId) {
+        return ResponseEntity.ok(lecturerService.getAll(universityId));
     }
 
     @PostMapping
@@ -33,10 +34,5 @@ public class LecturerController {
             @Valid @RequestBody CreateLecturerRequest request) {
         return ResponseEntity.ok(lecturerService.update(id, request));
     }
-
-    @PatchMapping("/{id}/archive")
-    public ResponseEntity<Void> archive(@PathVariable Long id) {
-        lecturerService.archive(id);
-        return ResponseEntity.ok().build();
-    }
+    
 }

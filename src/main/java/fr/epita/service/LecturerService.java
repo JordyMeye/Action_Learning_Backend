@@ -21,23 +21,32 @@ public class LecturerService {
     private final LecturerRepository lecturerRepository;
     private final ProgrammeRepository programmeRepository;
 
-    public List<LecturerResponse> getAll() {
-        return lecturerRepository.findAll()
-                .stream()
+    public List<LecturerResponse> getAll(Long universityId) {
+        List<Lecturer> lecturers = (universityId != null)
+                ? lecturerRepository.findDistinctByProgrammes_UniversityId(universityId)
+                : lecturerRepository.findAll();
+        return lecturers.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional
     public LecturerResponse create(CreateLecturerRequest request) {
-        Programme programme = programmeRepository.findById(request.getProgrammeId())
-                .orElseThrow(() -> new EntityNotFoundException("Programme not found"));
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalStateException("Password is required");
+        }
+        if (lecturerRepository.existsByLecturerRef(request.getLecturerRef())) {
+            throw new IllegalStateException("Lecturer reference already exists");
+        }
+        List<Programme> programmes = resolveProgrammes(request.getProgrammeIds());
 
         Lecturer lecturer = Lecturer.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .programme(programme)
+                .lecturerRef(request.getLecturerRef())
+                .password(request.getPassword())
+                .programmes(programmes)
                 .status(LecturerStatus.ACTIVE)
                 .build();
 
@@ -49,25 +58,32 @@ public class LecturerService {
         Lecturer lecturer = lecturerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Lecturer not found"));
 
-        Programme programme = programmeRepository.findById(request.getProgrammeId())
-                .orElseThrow(() -> new EntityNotFoundException("Programme not found"));
+        List<Programme> programmes = resolveProgrammes(request.getProgrammeIds());
 
         lecturer.setFirstName(request.getFirstName());
         lecturer.setLastName(request.getLastName());
         lecturer.setEmail(request.getEmail());
-        lecturer.setProgramme(programme);
+        lecturer.setLecturerRef(request.getLecturerRef());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            lecturer.setPassword(request.getPassword());
+        }
+        lecturer.setProgrammes(programmes);
+        if (request.getStatus() != null) {
+            lecturer.setStatus(request.getStatus());
+        }
 
         return toResponse(lecturerRepository.save(lecturer));
     }
 
-    @Transactional
-    public void archive(Long id) {
-        Lecturer lecturer = lecturerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Lecturer not found"));
-
-        lecturer.setStatus(LecturerStatus.INACTIVE);
-
-        lecturerRepository.save(lecturer);
+    private List<Programme> resolveProgrammes(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new EntityNotFoundException("At least one programme is required");
+        }
+        List<Programme> programmes = programmeRepository.findAllById(ids);
+        if (programmes.size() != ids.size()) {
+            throw new EntityNotFoundException("Programme not found");
+        }
+        return programmes;
     }
 
     private LecturerResponse toResponse(Lecturer lecturer) {
@@ -76,8 +92,9 @@ public class LecturerService {
                 .firstName(lecturer.getFirstName())
                 .lastName(lecturer.getLastName())
                 .email(lecturer.getEmail())
-                .programmeId(lecturer.getProgramme().getId())
-                .programmeName(lecturer.getProgramme().getName())
+                .lecturerRef(lecturer.getLecturerRef())
+                .programmeIds(lecturer.getProgrammes().stream().map(Programme::getId).toList())
+                .programmeNames(lecturer.getProgrammes().stream().map(Programme::getName).toList())
                 .status(lecturer.getStatus().name())
                 .build();
     }

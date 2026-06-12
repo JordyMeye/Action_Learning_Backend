@@ -1,5 +1,6 @@
 package fr.epita.dto.Request;
 
+import fr.epita.enums.CohortStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -11,5 +12,7 @@ public class CreateCohortRequest {
 
     @NotNull
     private Long programmeId;
+
+    private CohortStatus status;
 }
 
