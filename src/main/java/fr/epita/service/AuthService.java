@@ -43,7 +43,7 @@ public class AuthService {
 
         appUserRepository.save(user);
 
-        return new AuthResponse(jwtUtil.generateToken(user.getEmail(), user.getRole()));
+        return new AuthResponse(jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUniversityId()));
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -54,7 +54,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        return new AuthResponse(jwtUtil.generateToken(user.getEmail(), user.getRole()));
+        return new AuthResponse(jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUniversityId()));
     }
 
     @Transactional

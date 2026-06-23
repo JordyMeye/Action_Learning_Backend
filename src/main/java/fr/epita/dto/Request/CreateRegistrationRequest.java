@@ -16,7 +16,10 @@ public class CreateRegistrationRequest {
     @NotBlank
     private String domain;
 
+    @NotBlank
     private String adminFirstName;
+
+    @NotBlank
     private String adminLastName;
 
     @NotBlank
