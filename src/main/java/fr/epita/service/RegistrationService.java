@@ -80,11 +80,14 @@ public class RegistrationService {
         if (reg.getStatus() != RegistrationStatus.PENDING)
             throw new IllegalStateException("Request is not pending");
 
-        // 1. Create university
+        // 1. Create university (or fetch existing)
         String code = deriveCode(reg.getDomain(), reg.getOrgName());
+        University university;
         if (!universityRepository.existsByName(reg.getOrgName()) && !universityRepository.existsByCode(code)) {
-            University uni = University.builder().name(reg.getOrgName()).code(code).build();
-            universityRepository.save(uni);
+            university = universityRepository.save(University.builder().name(reg.getOrgName()).code(code).build());
+        } else {
+            university = universityRepository.findByName(reg.getOrgName())
+                    .orElseThrow(() -> new EntityNotFoundException("University not found"));
         }
 
         // 2. Generate platform login email from name + domain  e.g. jordan.meye@epita.fr
@@ -100,6 +103,7 @@ public class RegistrationService {
                     .email(platformEmail)
                     .password(passwordEncoder.encode(tempPassword))
                     .role(Role.ROLE_ADMIN)
+                    .universityId(university.getId())
                     .build();
             appUserRepository.save(admin);
         }
@@ -148,6 +152,7 @@ public class RegistrationService {
     }
 
     private String sanitizeName(String name) {
+        if (name == null) return "";
         return name.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
     }
 
