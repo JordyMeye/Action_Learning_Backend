@@ -4,6 +4,7 @@ import fr.epita.dto.Request.ChangePasswordRequest;
 import fr.epita.dto.Request.LoginRequest;
 import fr.epita.dto.Request.RegisterRequest;
 import fr.epita.dto.Response.AuthResponse;
+import fr.epita.dto.Response.UserProfileResponse;
 import fr.epita.model.AppUser;
 import fr.epita.service.AuthService;
 import jakarta.validation.Valid;
@@ -28,6 +29,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> me(@AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(UserProfileResponse.builder()
+                .id(currentUser.getId())
+                .firstName(currentUser.getFirstName())
+                .surname(currentUser.getSurname())
+                .email(currentUser.getEmail())
+                .role(currentUser.getRole().name())
+                .universityId(currentUser.getUniversityId())
+                .build());
     }
 
     @PatchMapping("/change-password")
