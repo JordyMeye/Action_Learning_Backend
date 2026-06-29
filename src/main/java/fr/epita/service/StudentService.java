@@ -19,6 +19,7 @@ import fr.epita.repository.UniversityRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -187,10 +188,12 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentResponse update(Long id, CreateStudentRequest request) {
+    public StudentResponse update(Long id, CreateStudentRequest request, AppUser currentUser) {
 
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+
+        validateUniversityAccess(student.getProgramme().getUniversity().getId(), currentUser);
 
         student.setFirstName(request.getFirstName());
         student.setLastName(request.getLastName());
@@ -217,12 +220,20 @@ public class StudentService {
     }
 
     @Transactional
-    public void deactivate(Long id) {
+    public void deactivate(Long id, AppUser currentUser) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found"));
 
+        validateUniversityAccess(student.getProgramme().getUniversity().getId(), currentUser);
         student.setStatus(StudentStatus.INACTIVE);
         studentRepository.save(student);
+    }
+
+    private void validateUniversityAccess(Long resourceUniversityId, AppUser currentUser) {
+        if (currentUser == null || currentUser.getUniversityId() == null) return;
+        if (!currentUser.getUniversityId().equals(resourceUniversityId)) {
+            throw new AccessDeniedException("Access denied: resource belongs to a different university");
+        }
     }
 
     public StudentResponse getMyProfile(String email) {

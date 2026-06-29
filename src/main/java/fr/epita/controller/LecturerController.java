@@ -21,8 +21,9 @@ public class LecturerController {
 
     @GetMapping
     public ResponseEntity<List<LecturerResponse>> getAll(
-            @RequestParam(required = false) Long universityId) {
-        return ResponseEntity.ok(lecturerService.getAll(universityId));
+            @RequestParam(required = false) Long universityId,
+            @AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(lecturerService.getAll(resolve(universityId, currentUser)));
     }
 
     @PostMapping
@@ -35,8 +36,14 @@ public class LecturerController {
     @PutMapping("/{id}")
     public ResponseEntity<LecturerResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody CreateLecturerRequest request) {
-        return ResponseEntity.ok(lecturerService.update(id, request));
+            @Valid @RequestBody CreateLecturerRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(lecturerService.update(id, request, currentUser));
     }
-    
+
+    private Long resolve(Long universityId, AppUser currentUser) {
+        if (universityId != null) return universityId;
+        return currentUser != null ? currentUser.getUniversityId() : null;
+    }
+
 }
