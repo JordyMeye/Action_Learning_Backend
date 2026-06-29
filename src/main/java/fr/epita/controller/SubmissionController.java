@@ -4,11 +4,13 @@ import fr.epita.dto.Request.CreateSubmissionRequest;
 import fr.epita.dto.Request.GradeRequest;
 import fr.epita.dto.Response.GradeResponse;
 import fr.epita.dto.Response.SubmissionResponse;
+import fr.epita.model.AppUser;
 import fr.epita.service.GradeService;
 import fr.epita.service.SubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,10 @@ public class SubmissionController {
     @GetMapping
     public ResponseEntity<List<SubmissionResponse>> getAll(
             @RequestParam(required = false) Long cohortId,
-            @RequestParam(required = false) Long lecturerId) {
-        return ResponseEntity.ok(submissionService.getAll(cohortId, lecturerId));
+            @RequestParam(required = false) Long lecturerId,
+            @AuthenticationPrincipal AppUser currentUser) {
+        Long universityId = currentUser != null ? currentUser.getUniversityId() : null;
+        return ResponseEntity.ok(submissionService.getAll(cohortId, lecturerId, universityId));
     }
 
     @GetMapping("/{id}")

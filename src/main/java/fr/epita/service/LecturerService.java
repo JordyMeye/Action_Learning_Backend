@@ -13,6 +13,7 @@ import fr.epita.repository.ProgrammeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -90,9 +91,11 @@ public class LecturerService {
     }
 
     @Transactional
-    public LecturerResponse update(Long id, CreateLecturerRequest request) {
+    public LecturerResponse update(Long id, CreateLecturerRequest request, AppUser currentUser) {
         Lecturer lecturer = lecturerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Lecturer not found"));
+
+        validateUniversityAccess(lecturer, currentUser);
 
         List<Programme> programmes = resolveProgrammes(request.getProgrammeIds());
 
@@ -133,5 +136,14 @@ public class LecturerService {
                 .programmeNames(lecturer.getProgrammes().stream().map(Programme::getName).toList())
                 .status(lecturer.getStatus().name())
                 .build();
+    }
+
+    private void validateUniversityAccess(Lecturer lecturer, AppUser currentUser) {
+        if (currentUser == null || currentUser.getUniversityId() == null) return;
+        boolean belongs = lecturer.getProgrammes().stream()
+                .anyMatch(p -> currentUser.getUniversityId().equals(p.getUniversity().getId()));
+        if (!belongs) {
+            throw new AccessDeniedException("Access denied: resource belongs to a different university");
+        }
     }
 }
