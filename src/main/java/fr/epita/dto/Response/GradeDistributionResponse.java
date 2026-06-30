@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UniversityResponse {
-    private Long id;
-    private String name;
-    private String code;
-    private String domain;
+public class GradeDistributionResponse {
+    private String band;
+    private long count;
 }
