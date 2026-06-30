@@ -8,4 +8,5 @@ import java.util.List;
 public interface LecturerRepository extends JpaRepository<Lecturer, Long> {
     boolean existsByLecturerRef(String lecturerRef);
     List<Lecturer> findDistinctByProgrammes_UniversityId(Long universityId);
+    List<Lecturer> findByProgrammes_Id(Long programmeId);
 }

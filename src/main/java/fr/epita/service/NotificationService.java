@@ -26,7 +26,6 @@ public class NotificationService {
     public void notifyCohort(Submission submission, NotificationType type, String message) {
         List<Student> students = studentRepository.findByCohortId(submission.getCohort().getId());
 
-        // 1. In-platform notification for each student.
         List<Notification> notifications = students.stream()
                 .map(student -> Notification.builder()
                         .student(student)
@@ -38,7 +37,6 @@ public class NotificationService {
                 .toList();
         notificationRepository.saveAll(notifications);
 
-        // 2. Email each student 
         String subject = "Action Learning Platform — " + submission.getTitle();
         for (Student student : students) {
             if (student.getEmail() != null && !student.getEmail().isBlank()) {
@@ -46,6 +44,29 @@ public class NotificationService {
             }
         }
     }
+
+    // ── Student /me methods (look up student by email) ──
+
+    public List<NotificationResponse> getForStudentByEmail(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        return getForStudent(student.getId());
+    }
+
+    public long unreadCountByEmail(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        return unreadCount(student.getId());
+    }
+
+    @Transactional
+    public void markAllReadByEmail(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        markAllRead(student.getId());
+    }
+
+    // ── ID-based methods ──
 
     public List<NotificationResponse> getForStudent(Long studentId) {
         return notificationRepository.findByStudentIdOrderByCreatedAtDesc(studentId)

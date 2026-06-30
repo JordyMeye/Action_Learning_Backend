@@ -1,6 +1,7 @@
 package fr.epita.service;
 
 import fr.epita.dto.Request.CreateStudentRequest;
+import fr.epita.dto.Response.MyCohortResponse;
 import fr.epita.dto.Response.StudentResponse;
 import fr.epita.enums.RegistrationStatus;
 import fr.epita.enums.Role;
@@ -12,6 +13,7 @@ import fr.epita.model.Student;
 import fr.epita.model.University;
 import fr.epita.repository.AppUserRepository;
 import fr.epita.repository.CohortRepository;
+import fr.epita.repository.LecturerRepository;
 import fr.epita.repository.PendingRegistrationRepository;
 import fr.epita.repository.ProgrammeRepository;
 import fr.epita.repository.StudentRepository;
@@ -38,6 +40,7 @@ public class StudentService {
     private final CohortRepository cohortRepository;
     private final ProgrammeRepository programmeRepository;
     private final AppUserRepository appUserRepository;
+    private final LecturerRepository lecturerRepository;
     private final UniversityRepository universityRepository;
     private final PendingRegistrationRepository registrationRepository;
     private final PasswordEncoder passwordEncoder;
@@ -240,6 +243,33 @@ public class StudentService {
         Student student = studentRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Student profile not found"));
         return toResponse(student);
+    }
+
+    public MyCohortResponse getMyCohort(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+
+        Cohort cohort = student.getCohort();
+        if (cohort == null) throw new IllegalStateException("Student is not assigned to a cohort");
+
+        Programme programme = cohort.getProgramme();
+
+        List<String> lecturerNames = lecturerRepository.findByProgrammes_Id(programme.getId())
+                .stream()
+                .map(l -> l.getFirstName() + " " + l.getLastName())
+                .sorted()
+                .toList();
+
+        return MyCohortResponse.builder()
+                .cohortId(cohort.getId())
+                .cohortName(cohort.getName())
+                .programmeName(programme.getName())
+                .programmeCode(programme.getCode())
+                .status(cohort.getStatus().name())
+                .universityName(programme.getUniversity() != null
+                        ? programme.getUniversity().getName() : null)
+                .lecturerNames(lecturerNames)
+                .build();
     }
 
     private StudentResponse toResponse(Student student) {
