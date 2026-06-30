@@ -3,6 +3,7 @@ package fr.epita.controller;
 import fr.epita.dto.Request.CreateStudentRequest;
 import fr.epita.dto.Response.StudentResponse;
 import fr.epita.enums.StudentStatus;
+import fr.epita.model.AppUser;
 import fr.epita.service.StudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ public class StudentControllerTest {
     @Mock
     private StudentService studentService;
 
+    @Mock
+    private AppUser currentUser;
+
     @InjectMocks
     private StudentController studentController;
 
@@ -31,6 +35,8 @@ public class StudentControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        when(currentUser.getUniversityId()).thenReturn(1L);
 
         req = new CreateStudentRequest();
         req.setFirstName("Alice");
@@ -56,13 +62,13 @@ public class StudentControllerTest {
 
     @Test
     void testCreateStudent() {
-        when(studentService.create(req)).thenReturn(res);
+        when(studentService.create(req, 1L)).thenReturn(res);
 
-        ResponseEntity<StudentResponse> response = studentController.create(req);
+        ResponseEntity<StudentResponse> response = studentController.create(req, currentUser);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Alice", response.getBody().getFirstName());
-        verify(studentService, times(1)).create(req);
+        verify(studentService, times(1)).create(req, 1L);
     }
 
     @Test
