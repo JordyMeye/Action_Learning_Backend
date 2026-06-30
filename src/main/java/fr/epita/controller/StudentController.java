@@ -1,6 +1,7 @@
 package fr.epita.controller;
 
 import fr.epita.dto.Request.CreateStudentRequest;
+import fr.epita.dto.Response.MyCohortResponse;
 import fr.epita.dto.Response.StudentResponse;
 import fr.epita.model.AppUser;
 import fr.epita.service.StudentService;
@@ -32,6 +33,12 @@ public class StudentController {
     @GetMapping("/me")
     public ResponseEntity<StudentResponse> getMyProfile(@AuthenticationPrincipal AppUser currentUser) {
         return ResponseEntity.ok(studentService.getMyProfile(currentUser.getEmail()));
+    }
+
+    // GET OWN COHORT INFO
+    @GetMapping("/me/cohort")
+    public ResponseEntity<MyCohortResponse> getMyCohort(@AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(studentService.getMyCohort(currentUser.getEmail()));
     }
 
     // GET ALL
