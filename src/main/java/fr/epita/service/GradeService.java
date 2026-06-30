@@ -2,6 +2,7 @@ package fr.epita.service;
 
 import fr.epita.dto.Request.GradeRequest;
 import fr.epita.dto.Response.GradeResponse;
+import fr.epita.dto.Response.MyGradeResponse;
 import fr.epita.enums.GradeStatus;
 import fr.epita.model.Student;
 import fr.epita.model.StudentGrade;
@@ -31,6 +32,13 @@ public class GradeService {
         return studentGradeRepository.findBySubmissionId(submissionId)
                 .stream()
                 .map(this::toResponse)
+                .toList();
+    }
+
+    public List<MyGradeResponse> getMyGrades(String email) {
+        return studentGradeRepository.findByStudentEmailAndStatus(email, GradeStatus.RELEASED)
+                .stream()
+                .map(this::toMyGradeResponse)
                 .toList();
     }
 
@@ -80,6 +88,17 @@ public class GradeService {
     private Submission findSubmission(Long id) {
         return submissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Submission not found"));
+    }
+
+    private MyGradeResponse toMyGradeResponse(StudentGrade g) {
+        return MyGradeResponse.builder()
+                .submissionId(g.getSubmission().getId())
+                .submissionTitle(g.getSubmission().getTitle())
+                .maxPoints(g.getSubmission().getMaxPoints())
+                .grade(g.getGrade())
+                .feedback(g.getFeedback())
+                .gradedAt(g.getGradedAt())
+                .build();
     }
 
     private GradeResponse toResponse(StudentGrade g) {

@@ -3,9 +3,11 @@ package fr.epita.service;
 import fr.epita.dto.Request.CreateStudentRequest;
 import fr.epita.dto.Response.StudentResponse;
 import fr.epita.enums.StudentStatus;
+import fr.epita.model.AppUser;
 import fr.epita.model.Cohort;
 import fr.epita.model.Programme;
 import fr.epita.model.Student;
+import fr.epita.repository.AppUserRepository;
 import fr.epita.repository.CohortRepository;
 import fr.epita.repository.ProgrammeRepository;
 import fr.epita.repository.StudentRepository;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.List;
@@ -31,6 +34,15 @@ public class StudentServiceTest {
 
     @Mock
     private ProgrammeRepository programmeRepo;
+
+    @Mock
+    private AppUserRepository appUserRepo;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private StudentService studentService;
@@ -66,7 +78,7 @@ public class StudentServiceTest {
                 .firstName("Alice")
                 .lastName("Johnson")
                 .email("alice.johnson@gmail.com")
-                .password("Pass123")
+                .password("hashed")
                 .studentRef("STU-2025F-001")
                 .programme(programme)
                 .status(StudentStatus.ACTIVE)
@@ -76,13 +88,13 @@ public class StudentServiceTest {
 
     @Test
     void testCreateStudent() {
-        when(studentRepo.existsByEmail(req.getEmail())).thenReturn(false);
-        when(studentRepo.existsByStudentRef(req.getStudentRef())).thenReturn(false);
         when(cohortRepo.findById(10L)).thenReturn(Optional.of(cohort));
         when(programmeRepo.findById(1L)).thenReturn(Optional.of(programme));
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(appUserRepo.save(any(AppUser.class))).thenReturn(null);
         when(studentRepo.save(any(Student.class))).thenReturn(student);
 
-        StudentResponse res = studentService.create(req);
+        StudentResponse res = studentService.create(req, 1L);
 
         assertEquals("Alice", res.getFirstName());
         assertEquals(1L, res.getProgrammeId());
