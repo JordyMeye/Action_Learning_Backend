@@ -44,8 +44,9 @@ public class StudentController {
     // GET ALL
     @GetMapping
     public ResponseEntity<List<StudentResponse>> getAll(
-            @RequestParam(required = false) Long universityId) {
-        return ResponseEntity.ok(studentService.getAll(universityId));
+            @RequestParam(required = false) Long universityId,
+            @AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(studentService.getAll(resolve(universityId, currentUser)));
     }
 
     // GET BY COHORT
@@ -58,15 +59,23 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<StudentResponse> update(
             @PathVariable Long id,
-            @RequestBody CreateStudentRequest req) {
-        return ResponseEntity.ok(studentService.update(id, req));
+            @RequestBody CreateStudentRequest req,
+            @AuthenticationPrincipal AppUser currentUser) {
+        return ResponseEntity.ok(studentService.update(id, req, currentUser));
     }
 
     // DEACTIVATE
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        studentService.deactivate(id);
+    public ResponseEntity<Void> deactivate(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUser currentUser) {
+        studentService.deactivate(id, currentUser);
         return ResponseEntity.ok().build();
+    }
+
+    private Long resolve(Long universityId, AppUser currentUser) {
+        if (universityId != null) return universityId;
+        return currentUser != null ? currentUser.getUniversityId() : null;
     }
 
 }

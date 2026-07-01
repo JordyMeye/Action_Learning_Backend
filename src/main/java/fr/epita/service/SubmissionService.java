@@ -31,12 +31,14 @@ public class SubmissionService {
     private final LecturerRepository lecturerRepository;
     private final NotificationService notificationService;
 
-    public List<SubmissionResponse> getAll(Long cohortId, Long lecturerId) {
+    public List<SubmissionResponse> getAll(Long cohortId, Long lecturerId, Long universityId) {
         List<Submission> submissions;
         if (cohortId != null) {
             submissions = submissionRepository.findByCohortId(cohortId);
         } else if (lecturerId != null) {
             submissions = submissionRepository.findByLecturerId(lecturerId);
+        } else if (universityId != null) {
+            submissions = submissionRepository.findByCohort_Programme_University_Id(universityId);
         } else {
             submissions = submissionRepository.findAll();
         }
