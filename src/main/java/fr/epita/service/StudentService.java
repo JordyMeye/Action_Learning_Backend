@@ -101,7 +101,6 @@ public class StudentService {
                 .cohort(cohort)
                 .build();
         Student saved = studentRepository.save(student);
-        // Apply the login block at creation too (e.g. a student created as SUSPENDED cannot log in).
         syncLoginBlocked(saved);
         StudentResponse response = toResponse(saved);
 
@@ -113,12 +112,6 @@ public class StudentService {
         return response;
     }
 
-    /**
-     * Resolves the university email domain.
-     * Sources tried in order: university.domain → pending_registration → admin user email.
-     * Every resolved value is sanitized: if it contains '@' (i.e. a full email was stored by mistake),
-     * only the part after the last '@' is kept so we always return a bare domain like "uct.ac.za".
-     */
     private String resolveDomain(Long universityId, Programme programme) {
         University university = null;
 
@@ -143,7 +136,6 @@ public class StudentService {
             }
         }
 
-        // Level 3: every university admin's email is firstname.lastname@domain — extract the suffix.
         if (universityId != null) {
             Optional<AppUser> admin = appUserRepository.findFirstByUniversityIdAndRole(universityId, Role.ROLE_UNI_ADMIN);
             if (admin.isPresent()) {
@@ -156,10 +148,6 @@ public class StudentService {
                 "University domain is not configured. Please ensure the university was registered through the platform.");
     }
 
-    /**
-     * Extracts the bare domain from a value that may be either "uct.ac.za" or a full email "esther.smith@uct.ac.za".
-     * Returns only the part after the last '@', trimmed and lowercased.
-     */
     private String extractDomain(String raw) {
         if (raw == null) return "";
         raw = raw.trim().toLowerCase();
@@ -168,7 +156,6 @@ public class StudentService {
     }
 
     private String generatePlatformEmail(String firstName, String lastName, String domain) {
-        // If a full email was stored as the domain (e.g. "esther.smith@uct.ac.za"), keep only the part after @
         if (domain.contains("@")) {
             domain = domain.substring(domain.lastIndexOf('@') + 1);
         }
@@ -245,7 +232,6 @@ public class StudentService {
         syncLoginBlocked(studentRepository.save(student));
     }
 
-    /** A suspended / inactive / expelled / dropped-out student cannot log in. */
     private void syncLoginBlocked(Student student) {
         StudentStatus st = student.getStatus();
         boolean blocked = st == StudentStatus.SUSPENDED

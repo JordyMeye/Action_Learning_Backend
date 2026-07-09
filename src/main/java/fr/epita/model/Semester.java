@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.util.List;
 
-/** A semester within a programme, e.g. "Year 1 – Semester 1". */
 @Entity
 @Getter
 @Setter
@@ -23,7 +22,6 @@ public class Semester {
     @Column(nullable = false)
     private String name;
 
-    /** Ordering within the programme (1, 2, 3 …). */
     @Column(nullable = false)
     private int orderIndex = 1;
 

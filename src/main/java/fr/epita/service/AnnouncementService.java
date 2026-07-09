@@ -35,7 +35,6 @@ public class AnnouncementService {
 
         AnnouncementAudience audience = request.getAudience();
 
-        // Lecturers may only target students, not other lecturers
         if (role == Role.ROLE_LECTURER &&
                 (audience == AnnouncementAudience.ALL_UNIVERSITY_LECTURERS
                         || audience == AnnouncementAudience.SPECIFIC_LECTURERS)) {
@@ -94,7 +93,6 @@ public class AnnouncementService {
         }
     }
 
-    /** Student inbox */
     public List<AnnouncementResponse> getInboxForStudent(AppUser currentUser) {
         Student student = studentRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Student profile not found"));
@@ -111,7 +109,6 @@ public class AnnouncementService {
         return studentRecipientRepository.findByStudentIdAndReadFlagFalse(student.getId()).size();
     }
 
-    /** Lecturer inbox */
     public List<AnnouncementResponse> getInboxForLecturer(AppUser currentUser) {
         Lecturer lecturer = lecturerRepository.findByEmail(currentUser.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Lecturer profile not found"));
@@ -128,7 +125,6 @@ public class AnnouncementService {
         return lecturerRecipientRepository.findByLecturerIdAndReadFlagFalse(lecturer.getId()).size();
     }
 
-    /** Mark a student recipient row as read */
     @Transactional
     public void markStudentRead(Long recipientId) {
         AnnouncementStudentRecipient row = studentRecipientRepository.findById(recipientId)
@@ -137,7 +133,6 @@ public class AnnouncementService {
         studentRecipientRepository.save(row);
     }
 
-    /** Mark all student announcement rows as read */
     @Transactional
     public void markAllStudentRead(AppUser currentUser) {
         Student student = studentRepository.findByEmail(currentUser.getEmail())
@@ -148,7 +143,6 @@ public class AnnouncementService {
         studentRecipientRepository.saveAll(unread);
     }
 
-    /** Mark a lecturer recipient row as read */
     @Transactional
     public void markLecturerRead(Long recipientId) {
         AnnouncementLecturerRecipient row = lecturerRecipientRepository.findById(recipientId)
@@ -157,7 +151,6 @@ public class AnnouncementService {
         lecturerRecipientRepository.save(row);
     }
 
-    /** Mark all lecturer announcement rows as read */
     @Transactional
     public void markAllLecturerRead(AppUser currentUser) {
         Lecturer lecturer = lecturerRepository.findByEmail(currentUser.getEmail())
@@ -168,7 +161,6 @@ public class AnnouncementService {
         lecturerRecipientRepository.saveAll(unread);
     }
 
-    /** Sent-outbox for the current user (UNI_ADMIN or Lecturer) */
     public List<SentAnnouncementResponse> getSent(AppUser currentUser) {
         return announcementRepository
                 .findBySenderEmailOrderBySentAtDesc(currentUser.getEmail())

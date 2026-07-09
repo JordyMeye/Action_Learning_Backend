@@ -24,7 +24,6 @@ public class SuperAdminService {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$!";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    /** Returns all non-deleted admin users (university admins + platform admins). */
     public List<PlatformAdminResponse> listPlatformAdmins() {
         return appUserRepository.findByRoleInAndDeletedFalse(
                         List.of(Role.ROLE_UNI_ADMIN, Role.ROLE_PLATFORM_ADMIN))
@@ -33,7 +32,6 @@ public class SuperAdminService {
                 .toList();
     }
 
-    /** Creates a new platform admin and emails their temporary credentials. */
     public PlatformAdminResponse createPlatformAdmin(CreatePlatformAdminRequest req) {
         String email = req.getEmail().trim().toLowerCase();
         if (appUserRepository.existsByEmail(email)) {
@@ -55,25 +53,18 @@ public class SuperAdminService {
         return toResponse(admin);
     }
 
-    /** Blocks a platform admin — they can no longer log in. */
     public PlatformAdminResponse blockPlatformAdmin(Long id) {
         AppUser admin = findActive(id);
         admin.setBlocked(true);
         return toResponse(appUserRepository.save(admin));
     }
 
-    /** Unblocks a platform admin — restores login access. */
     public PlatformAdminResponse unblockPlatformAdmin(Long id) {
         AppUser admin = findActive(id);
         admin.setBlocked(false);
         return toResponse(appUserRepository.save(admin));
     }
 
-    /**
-     * Soft-deletes a platform admin.
-     * Sets deleted = true so they are hidden from the UI but kept in the database.
-     * Only a developer can restore them via the database.
-     */
     public void softDeletePlatformAdmin(Long id) {
         AppUser admin = findActive(id);
         admin.setDeleted(true);

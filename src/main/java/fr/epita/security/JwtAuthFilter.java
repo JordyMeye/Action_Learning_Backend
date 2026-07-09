@@ -45,7 +45,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String email = jwtUtil.extractEmail(token);
         String role = jwtUtil.extractRole(token);
 
-        // Only populate context if not already authenticated
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             appUserRepository.findByEmail(email).ifPresent(user -> {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

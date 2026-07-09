@@ -65,7 +65,6 @@ public class AnalyticsService {
     private final StudentGradeRepository studentGradeRepository;
     private final SubmissionUploadRepository uploadRepository;
 
-    //  Tenant summary 
     @Transactional(readOnly = true)
     public TenantSummaryResponse tenantSummary(Long universityId) {
         requireUniversity(universityId);
@@ -102,7 +101,6 @@ public class AnalyticsService {
                 .build();
     }
 
-    //  6-month trends 
     @Transactional(readOnly = true)
     public List<TrendPointResponse> tenantTrends(Long universityId) {
         requireUniversity(universityId);
@@ -134,7 +132,6 @@ public class AnalyticsService {
         return series;
     }
 
-    //  Grade-band distribution
     @Transactional(readOnly = true)
     public List<GradeDistributionResponse> gradeDistribution(Long universityId) {
         requireUniversity(universityId);
@@ -156,7 +153,6 @@ public class AnalyticsService {
         );
     }
 
-    //  Within-university cohort benchmark
     @Transactional(readOnly = true)
     public List<CohortBenchmarkResponse> cohortBenchmark(Long universityId) {
         requireUniversity(universityId);
@@ -204,7 +200,6 @@ public class AnalyticsService {
         return rows;
     }
 
-    //  Grading backlog — turned-in submissions with no released grade yet
     @Transactional(readOnly = true)
     public GradingBacklogResponse gradingBacklog(Long universityId) {
         requireUniversity(universityId);
@@ -219,7 +214,6 @@ public class AnalyticsService {
                 .build();
     }
 
-    //  At-risk students — low average and/or repeated missed submissions
     @Transactional(readOnly = true)
     public List<AtRiskStudentResponse> atRiskStudents(Long universityId) {
         requireUniversity(universityId);
@@ -279,7 +273,6 @@ public class AnalyticsService {
         return out;
     }
 
-    //  Lecturer workload — assignments, cohorts taught, grading backlog per lecturer
     @Transactional(readOnly = true)
     public List<LecturerWorkloadResponse> lecturerWorkload(Long universityId) {
         requireUniversity(universityId);
@@ -310,7 +303,6 @@ public class AnalyticsService {
         return out;
     }
 
-    //  Lecturer dashboard overview (resolved by the authenticated lecturer's email)
     @Transactional(readOnly = true)
     public LecturerOverviewResponse lecturerOverview(String email, Long universityId) {
         Lecturer lecturer = lecturerRepository.findByEmail(email).orElse(null);
@@ -391,7 +383,7 @@ public class AnalyticsService {
                 activity.add(LecturerOverviewResponse.ActivityItem.builder()
                         .type("GRADE")
                         .text("Released grade for " + g.getStudent().getFirstName() + " "
-                                + g.getStudent().getLastName() + " — \"" + g.getSubmission().getTitle() + "\"")
+                                + g.getStudent().getLastName() + "  \"" + g.getSubmission().getTitle() + "\"")
                         .at(g.getGradedAt().toString())
                         .build());
             }
@@ -500,8 +492,6 @@ public class AnalyticsService {
         return bandGrades(List.of());
     }
 
-    //  Helpers
-    /** Set of "submissionId:studentId" for every turned-in upload across the given submissions. */
     private Set<String> turnedInKeys(List<Submission> submissions) {
         Set<String> keys = new HashSet<>();
         for (Submission s : submissions) {
@@ -512,7 +502,6 @@ public class AnalyticsService {
         return keys;
     }
 
-    /** Set of "submissionId:studentId" for every released grade in the university. */
     private Set<String> releasedKeys(Long universityId) {
         Set<String> keys = new HashSet<>();
         for (StudentGrade g : releasedGrades(universityId)) {
@@ -547,16 +536,12 @@ public class AnalyticsService {
         return Math.round(v * 10.0) / 10.0;
     }
 
-    /** Programme id an assignment belongs to (via its course). */
     private Long progIdOf(Submission s) {
         return s.getCourse() != null && s.getCourse().getProgramme() != null
                 ? s.getCourse().getProgramme().getId() : null;
     }
 
     private void requireUniversity(Long universityId) {
-        // Intentionally a no-op. When there is no university context (e.g. an
-        // unauthenticated or platform-level request that fires during page load),
-        // the queries below simply match nothing and analytics return empty/zero
-        // results, instead of failing the request with a 500.
+
     }
 }

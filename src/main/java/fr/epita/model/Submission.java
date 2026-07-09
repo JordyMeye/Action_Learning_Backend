@@ -30,21 +30,17 @@ public class Submission {
     @Column(length = 4000)
     private String description;
 
-    /** Free-text notes shown alongside the assignment. */
     @Column(length = 2000)
     private String additionalNotes;
 
-    /** What the student must submit: FILE, TEXT or BOTH. */
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)")
     private SubmissionType submissionType = SubmissionType.BOTH;
 
-    /** Lifecycle: DRAFT (hidden), PUBLISHED (visible), ARCHIVED. */
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)")
     private SubmissionStatus status = SubmissionStatus.DRAFT;
 
-    /** Assignments now belong to a Course (not a cohort). */
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
@@ -56,7 +52,6 @@ public class Submission {
     @Column(nullable = false)
     private LocalDate dueDate;
 
-    /** Time-of-day component of the deadline (defaults to 23:59). */
     private LocalTime dueTime;
 
     @Column(nullable = false)
@@ -72,7 +67,6 @@ public class Submission {
     @Column(length = 5000)
     private String instructions;
 
-    /** Student ids explicitly re-opened for a late exception. */
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "submission_reopened_students",
@@ -92,7 +86,6 @@ public class Submission {
         if (submissionType == null) submissionType = SubmissionType.BOTH;
     }
 
-    /** Full deadline as an Instant (UTC), using 23:59 when no time is set. */
     public java.time.LocalDateTime deadline() {
         return dueDate.atTime(dueTime != null ? dueTime : LocalTime.of(23, 59));
     }

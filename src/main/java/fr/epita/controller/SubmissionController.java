@@ -32,7 +32,6 @@ public class SubmissionController {
         Long universityId = currentUser != null ? currentUser.getUniversityId() : null;
         boolean studentView = currentUser != null && currentUser.getRole() == Role.ROLE_STUDENT;
 
-        // Lecturers can only see their own submissions, not all submissions in their university
         if (currentUser != null && currentUser.getRole() == Role.ROLE_LECTURER && lecturerId == null) {
             lecturerId = submissionService.getLecturerIdByEmail(currentUser.getEmail());
         }
@@ -89,8 +88,6 @@ public class SubmissionController {
             @PathVariable Long id, @PathVariable Long studentId) {
         return ResponseEntity.ok(submissionService.reopenForStudent(id, studentId));
     }
-
-    //  Grades
 
     @GetMapping("/{id}/grades")
     public ResponseEntity<List<GradeResponse>> getGrades(@PathVariable Long id) {

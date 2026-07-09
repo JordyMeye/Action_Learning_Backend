@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GradingBacklogResponse {
-    /** Turned-in submissions that have no released grade yet. */
     private long awaitingGrades;
-    /** Total turned-in (submission, student) pairs. */
     private long turnedIn;
-    /** Released grades. */
     private long released;
 }

@@ -18,54 +18,45 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Invalid credentials
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    // Deactivated / blocked account
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<?> handleDisabled(DisabledException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    // Not found - Data not found
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<?> handleNotFound(EntityNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // Validation error
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed");
     }
 
-    // Forbidden — wrong role or cross-university access
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    // Duplicate Data
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<?> handleConflict(IllegalStateException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // Internal Server Error — log the full stack trace and surface the real cause to the client.
-    // AI / compliance service unreachable
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<?> handleRestClient(RestClientException ex) {
         return buildResponse(HttpStatus.SERVICE_UNAVAILABLE,
                 "The compliance service is currently unavailable. Please ensure the AI service is running and try again.");
     }
 
-    // Internal Server Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneral(Exception ex) {
-        ex.printStackTrace(); // ensure the trace appears in the backend console
+        ex.printStackTrace(); 
         String detail = ex.getClass().getSimpleName()
                 + (ex.getMessage() != null ? ": " + ex.getMessage() : "");
         Throwable root = ex;

@@ -28,9 +28,6 @@ public class CourseService {
     private final StudentRepository studentRepository;
     private final SubmissionRepository submissionRepository;
 
-    /**
-     * Lists courses, scoped by (in priority order) semester, programme, lecturer or university.
-     */
     public List<CourseResponse> getAll(Long semesterId, Long programmeId, Long lecturerId, Long universityId) {
         List<Course> courses;
         if (semesterId != null) {
@@ -61,7 +58,7 @@ public class CourseService {
                 .code(request.getCode())
                 .description(request.getDescription())
                 .semester(semester)
-                .programme(semester.getProgramme())   // denormalised from the semester
+                .programme(semester.getProgramme())   
                 .lecturer(resolveLecturer(request.getLecturerId()))
                 .status(CourseStatus.ACTIVE)
                 .build();

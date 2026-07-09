@@ -14,7 +14,6 @@ public class StudentSubmissionResponse {
     private String studentName;
     private String studentRef;
     private String studentEmail;
-    /** SUBMITTED, LATE or NOT_SUBMITTED. */
     private String status;
     private Long uploadId;
     private String fileName;

@@ -19,12 +19,9 @@ public class SendAnnouncementRequest {
     @NotNull
     private AnnouncementAudience audience;
 
-    /** Required when audience = ALL_COHORT_STUDENTS */
     private Long cohortId;
 
-    /** Required when audience = SPECIFIC_STUDENTS */
     private List<Long> studentIds;
 
-    /** Required when audience = SPECIFIC_LECTURERS */
     private List<Long> lecturerIds;
 }

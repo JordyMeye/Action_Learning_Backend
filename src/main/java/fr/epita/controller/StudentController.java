@@ -20,7 +20,6 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    // CREATE
     @PostMapping
     public ResponseEntity<StudentResponse> create(
             @RequestBody CreateStudentRequest req,
@@ -29,19 +28,16 @@ public class StudentController {
                 .body(studentService.create(req, currentUser.getUniversityId()));
     }
 
-    // GET OWN PROFILE
     @GetMapping("/me")
     public ResponseEntity<StudentResponse> getMyProfile(@AuthenticationPrincipal AppUser currentUser) {
         return ResponseEntity.ok(studentService.getMyProfile(currentUser.getEmail()));
     }
 
-    // GET OWN COHORT INFO
     @GetMapping("/me/cohort")
     public ResponseEntity<MyCohortResponse> getMyCohort(@AuthenticationPrincipal AppUser currentUser) {
         return ResponseEntity.ok(studentService.getMyCohort(currentUser.getEmail()));
     }
 
-    // GET ALL
     @GetMapping
     public ResponseEntity<List<StudentResponse>> getAll(
             @RequestParam(required = false) Long universityId,
@@ -49,13 +45,11 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getAll(resolve(universityId, currentUser)));
     }
 
-    // GET BY COHORT
     @GetMapping("/cohort/{cohortId}")
     public ResponseEntity<List<StudentResponse>> getByCohort(@PathVariable Long cohortId) {
         return ResponseEntity.ok(studentService.getByCohort(cohortId));
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<StudentResponse> update(
             @PathVariable Long id,
@@ -64,7 +58,6 @@ public class StudentController {
         return ResponseEntity.ok(studentService.update(id, req, currentUser));
     }
 
-    // DEACTIVATE
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(
             @PathVariable Long id,

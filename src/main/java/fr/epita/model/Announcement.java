@@ -26,24 +26,19 @@ public class Announcement {
     @Column(nullable = false, length = 2000)
     private String message;
 
-    /** Display name of the sender (e.g. "Sarah Duboix") */
     @Column(nullable = false)
     private String senderName;
 
-    /** Role of the sender: ROLE_UNI_ADMIN or ROLE_LECTURER */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role senderRole;
 
-    /** University this announcement belongs to — used for scoping */
     @Column(nullable = false)
     private Long universityId;
 
-    /** Email of the sender — used to retrieve sent announcements per user */
     @Column
     private String senderEmail;
 
-    /** Stored for ALL_COHORT_STUDENTS announcements so sent-view can show cohort name */
     @Column
     private Long cohortId;
 

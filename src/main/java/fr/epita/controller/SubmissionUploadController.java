@@ -81,7 +81,6 @@ public class SubmissionUploadController {
         return ResponseEntity.ok(status);
     }
 
-    /** Row 68 — lecturer uploads a template/brief file for the assignment. */
     @PostMapping(value = "/{submissionId}/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadTemplate(
             @PathVariable Long submissionId,
@@ -92,7 +91,6 @@ public class SubmissionUploadController {
         return ResponseEntity.ok().build();
     }
 
-    /** Row 68 — anyone in the cohort (and the lecturer) downloads the template file. */
     @GetMapping("/{submissionId}/template")
     public ResponseEntity<byte[]> downloadTemplate(@PathVariable Long submissionId) throws IOException {
         Submission submission = submissionRepository.findById(submissionId)
@@ -104,7 +102,6 @@ public class SubmissionUploadController {
         return fileResponse(data, submission.getTemplateFileName());
     }
 
-    /** Row 75 — lecturer downloads a single student's submitted file. Students can only download their own. */
     @GetMapping("/uploads/{uploadId}/download")
     public ResponseEntity<byte[]> downloadUpload(
             @PathVariable Long uploadId,
@@ -121,7 +118,6 @@ public class SubmissionUploadController {
         return fileResponse(data, upload.getOriginalFileName());
     }
 
-    /** Returns the NLP scoring breakdown for an upload — lecturer and uni-admin only. */
     @GetMapping("/uploads/{uploadId}/score")
     public ResponseEntity<ScoringReportResponse> getScore(
             @PathVariable Long uploadId,
@@ -132,7 +128,6 @@ public class SubmissionUploadController {
         return ResponseEntity.ok(uploadService.getScore(uploadId));
     }
 
-    /** Row 76 — lecturer downloads every submission for an assignment as one ZIP. */
     @GetMapping("/{submissionId}/download-zip")
     public ResponseEntity<byte[]> downloadZip(
             @PathVariable Long submissionId,

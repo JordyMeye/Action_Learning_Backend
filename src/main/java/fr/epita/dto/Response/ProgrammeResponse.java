@@ -16,7 +16,6 @@ public class ProgrammeResponse {
     private String universityName;
     private ProgrammeStatus status;
 
-    /** Cohorts (intakes) this programme is attached to. */
     private List<Long> cohortIds;
     private List<String> cohortNames;
 

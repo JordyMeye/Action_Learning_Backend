@@ -24,7 +24,6 @@ public class NotificationService {
     private final SubmissionUploadRepository uploadRepository;
     private final EmailService emailService;
 
-    /** Notifies every student enrolled in the programme of this assignment's course. */
     @Transactional
     public void notifyCourseStudents(Submission submission, NotificationType type, String message) {
         for (Student student : audienceFor(submission)) {
@@ -32,7 +31,6 @@ public class NotificationService {
         }
     }
 
-    /** Notifies (in-app + email) a single student about a submission. */
     @Transactional
     public void notifyStudent(Student student, Submission submission, NotificationType type, String message) {
         notificationRepository.save(Notification.builder()
@@ -43,12 +41,11 @@ public class NotificationService {
                 .readFlag(false)
                 .build());
         if (student.getEmail() != null && !student.getEmail().isBlank()) {
-            String subject = "Action Learning Platform — " + submission.getTitle();
+            String subject = "Action Learning Platform  " + submission.getTitle();
             emailService.sendNotificationEmail(student.getEmail(), student.getFirstName(), subject, message);
         }
     }
 
-    /** Row 113 — notifies only course students who have NOT turned in this submission. Returns how many. */
     @Transactional
     public int notifyNonSubmitters(Submission submission, NotificationType type, String message) {
         int count = 0;
@@ -65,15 +62,12 @@ public class NotificationService {
         return count;
     }
 
-    /** The audience of an assignment = all students enrolled in the course's programme. */
     private List<Student> audienceFor(Submission submission) {
         if (submission.getCourse() == null || submission.getCourse().getProgramme() == null) {
             return java.util.List.of();
         }
         return studentRepository.findByProgrammeId(submission.getCourse().getProgramme().getId());
     }
-
-    // ── Student /me methods (look up student by email) ──
 
     public List<NotificationResponse> getForStudentByEmail(String email) {
         Student student = studentRepository.findByEmail(email)
@@ -93,8 +87,6 @@ public class NotificationService {
                 .orElseThrow(() -> new EntityNotFoundException("Student not found"));
         markAllRead(student.getId());
     }
-
-    // ── ID-based methods ──
 
     public List<NotificationResponse> getForStudent(Long studentId) {
         return notificationRepository.findByStudentIdOrderByCreatedAtDesc(studentId)

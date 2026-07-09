@@ -36,7 +36,6 @@ public class Programme {
     @JoinColumn(name = "university_id")
     private University university;
 
-    /** Intakes (cohorts) in which this programme runs. Owning side of the M2M. */
     @ManyToMany
     @JoinTable(
             name = "programme_cohorts",
@@ -46,7 +45,6 @@ public class Programme {
     @JsonIgnore
     private List<Cohort> cohorts;
 
-    /** Semesters that structure this programme (Year 1 Sem 1, …). */
     @OneToMany(mappedBy = "programme")
     @JsonIgnore
     private List<Semester> semesters;

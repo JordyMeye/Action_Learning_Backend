@@ -22,7 +22,6 @@ public class SemesterService {
     private final ProgrammeRepository programmeRepository;
     private final CourseRepository courseRepository;
 
-    /** All semesters, optionally scoped to a programme (or a whole university when programmeId is null). */
     public List<SemesterResponse> getAll(Long programmeId, Long universityId) {
         List<Semester> semesters;
         if (programmeId != null) {

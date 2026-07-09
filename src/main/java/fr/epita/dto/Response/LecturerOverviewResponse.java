@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class LecturerOverviewResponse {
 
-    /** Turned-in submissions with no grade yet (across all this lecturer's assignments). */
     private long gradingBacklog;
 
     private long compliancePassed;
@@ -43,7 +42,6 @@ public class LecturerOverviewResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ActivityItem {
-        /** SUBMISSION or GRADE. */
         private String type;
         private String text;
         private String at;

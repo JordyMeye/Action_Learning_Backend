@@ -22,7 +22,6 @@ public class TimetableResponse {
     private Long cohortId;
     private String cohortName;
 
-    /** Names of programmes running in this cohort — a slot can serve multiple programmes. */
     private List<String> programmeNames;
 
     private Long lecturerId;

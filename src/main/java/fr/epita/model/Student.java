@@ -27,7 +27,7 @@ public class Student {
     private String email;
 
     @Column(nullable = false)
-    private String password; // TEMPORARY
+    private String password; 
 
     @Column(nullable = false, unique = true)
     private String studentRef;

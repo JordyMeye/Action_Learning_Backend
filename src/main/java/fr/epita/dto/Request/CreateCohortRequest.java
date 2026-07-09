@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 public class CreateCohortRequest {
 
-    /** Optional display name; auto-generated from season + year when blank (e.g. "Spring 2026"). */
     private String name;
 
     @NotNull
@@ -21,6 +20,5 @@ public class CreateCohortRequest {
 
     private CohortStatus status;
 
-    /** Programmes that run in this intake (many-to-many). */
     private List<Long> programmeIds;
 }

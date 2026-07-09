@@ -8,10 +8,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Exposes CorsConfigurationSource as a bean so both Spring MVC and Spring Security
- * share the same CORS policy (Spring Security 6 bypasses WebMvcConfigurer-based CORS).
- */
 @Configuration
 public class CorsConfig {
 

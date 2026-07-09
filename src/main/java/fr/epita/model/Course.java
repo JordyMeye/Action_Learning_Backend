@@ -7,11 +7,6 @@ import lombok.*;
 
 import java.util.List;
 
-/**
- * A course within a semester (and therefore a programme). Coursework/assignments hang off a course.
- * A course optionally has a teaching lecturer. Its students are derived: all students of the
- * course's programme.
- */
 @Entity
 @Getter
 @Setter
@@ -37,12 +32,10 @@ public class Course {
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
-    /** Denormalised for easy scoping; equals semester.programme. */
     @ManyToOne
     @JoinColumn(name = "programme_id", nullable = false)
     private Programme programme;
 
-    /** The course's teaching lecturer (optional). */
     @ManyToOne
     @JoinColumn(name = "lecturer_id")
     private Lecturer lecturer;

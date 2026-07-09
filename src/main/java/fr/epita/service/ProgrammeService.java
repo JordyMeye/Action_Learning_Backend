@@ -90,7 +90,6 @@ public class ProgrammeService {
         return toResponse(programme);
     }
 
-    /** Archives a programme. Blocked if it still has enrolled students or assigned lecturers. */
     @Transactional
     public void archive(Long id) {
         Programme programme = programmeRepository.findById(id)
@@ -107,7 +106,6 @@ public class ProgrammeService {
         programmeRepository.save(programme);
     }
 
-    /** Restores an archived programme back to active. */
     @Transactional
     public void unarchive(Long id) {
         Programme programme = programmeRepository.findById(id)

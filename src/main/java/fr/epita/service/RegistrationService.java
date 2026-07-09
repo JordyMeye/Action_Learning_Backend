@@ -35,7 +35,6 @@ public class RegistrationService {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$!";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    /** Public: a visitor submits an access request from the landing page. */
     public RegistrationResponse submit(CreateRegistrationRequest request) {
         String domain = request.getDomain().trim().toLowerCase();
         String email = request.getAdminContactEmail().trim().toLowerCase();
@@ -69,18 +68,12 @@ public class RegistrationService {
         return rows.stream().map(this::toResponse).toList();
     }
 
-    /**
-     * Approve: creates the University, provisions a ROLE_UNI_ADMIN AppUser whose login
-     * email is generated as firstname.lastname@domain, then emails both the generated
-     * email and the temp password to the requester's contact email.
-     */
     @Transactional
     public RegistrationResponse approve(Long id) {
         PendingRegistration reg = find(id);
         if (reg.getStatus() != RegistrationStatus.PENDING)
             throw new IllegalStateException("Request is not pending");
 
-        // 1. Create university (or fetch existing)
         String code = deriveCode(reg.getDomain(), reg.getOrgName());
         University university;
         if (!universityRepository.existsByName(reg.getOrgName()) && !universityRepository.existsByCode(code)) {
@@ -90,11 +83,10 @@ public class RegistrationService {
                     .orElseThrow(() -> new EntityNotFoundException("University not found"));
         }
 
-        // 2. Generate platform login email from name + domain  e.g. jordan.meye@epita.fr
         String platformEmail = generatePlatformEmail(reg.getAdminFirstName(), reg.getAdminLastName(), reg.getDomain());
         String tempPassword = generateTempPassword();
 
-        log.info("Approving registration for {} — platform email: {}", reg.getAdminContactEmail(), platformEmail);
+        log.info("Approving registration for {}  platform email: {}", reg.getAdminContactEmail(), platformEmail);
 
         if (!appUserRepository.existsByEmail(platformEmail)) {
             AppUser admin = AppUser.builder()
@@ -108,7 +100,6 @@ public class RegistrationService {
             appUserRepository.save(admin);
         }
 
-        // 3. Send credentials to the contact email (async — does not block the transaction)
         emailService.sendApprovalEmail(
                 reg.getAdminContactEmail(),
                 reg.getAdminFirstName(),
@@ -132,16 +123,11 @@ public class RegistrationService {
         reg.setReviewedAt(Instant.now());
         PendingRegistration saved = registrationRepository.save(reg);
 
-        // Notify the requester of the decision
         emailService.sendRejectionEmail(reg.getAdminContactEmail(), reg.getAdminFirstName(), reason);
 
         return toResponse(saved);
     }
 
-    /**
-     * Generates firstname.lastname@domain.
-     * Appends a numeric suffix if that address already exists: firstname.lastname2@domain, etc.
-     */
     private String generatePlatformEmail(String firstName, String lastName, String domain) {
         String local = sanitizeName(firstName) + "." + sanitizeName(lastName);
         String candidate = local + "@" + domain;

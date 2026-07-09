@@ -63,21 +63,15 @@ public class TimetableService {
         return entries.stream().map(this::toResponse).toList();
     }
 
-    /**
-     * Returns all timetable entries grouped by day of week, sorted by startTime within each day.
-     * Days with no entries are omitted. Multiple entries at the same time are preserved as a list.
-     */
     public Map<String, List<TimetableResponse>> getWeekly(AppUser currentUser) {
         List<TimetableResponse> all = getAll(currentUser);
 
-        // Maintain calendar order: Mon → Sun
         Map<String, List<TimetableResponse>> grouped = new LinkedHashMap<>();
         Arrays.stream(DayOfWeek.values()).forEach(day ->
                 grouped.put(day.name(), new java.util.ArrayList<>()));
 
         all.forEach(entry -> grouped.get(entry.getDayOfWeek().name()).add(entry));
 
-        // Sort each day's list by startTime, then remove empty days
         grouped.values().forEach(list ->
                 list.sort(java.util.Comparator.comparing(TimetableResponse::getStartTime)));
         grouped.entrySet().removeIf(e -> e.getValue().isEmpty());

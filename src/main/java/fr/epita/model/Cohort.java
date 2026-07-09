@@ -21,7 +21,6 @@ public class Cohort {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Display name, e.g. "Spring 2026". */
     @Column(nullable = false)
     private String name;
 
@@ -32,7 +31,6 @@ public class Cohort {
     @Column(nullable = false)
     private int academicYear;
 
-    /** A cohort is now directly scoped to a university (no longer via a programme). */
     @ManyToOne
     @JoinColumn(name = "university_id", nullable = false)
     private University university;
@@ -41,12 +39,10 @@ public class Cohort {
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private CohortStatus status = CohortStatus.NOT_STARTED;
 
-    /** Programmes that run in this intake (inverse side; join table owned by Programme). */
     @ManyToMany(mappedBy = "cohorts")
     @JsonIgnore
     private List<Programme> programmes;
 
-    /** Students who belong to this intake. */
     @OneToMany(mappedBy = "cohort")
     @JsonIgnore
     private List<Student> students;

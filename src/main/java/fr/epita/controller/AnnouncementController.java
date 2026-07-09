@@ -23,8 +23,6 @@ public class AnnouncementController {
 
     private final AnnouncementService announcementService;
 
-    // ── SEND (Lecturer + UNI_ADMIN) ──────────────────────────────────────
-
     @PostMapping
     public ResponseEntity<Void> send(
             @Valid @RequestBody SendAnnouncementRequest request,
@@ -33,15 +31,11 @@ public class AnnouncementController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // ── SENT OUTBOX (UNI_ADMIN + Lecturer) ──────────────────────────────
-
     @GetMapping("/sent")
     public ResponseEntity<List<SentAnnouncementResponse>> getSent(
             @AuthenticationPrincipal AppUser currentUser) {
         return ResponseEntity.ok(announcementService.getSent(currentUser));
     }
-
-    // ── STUDENT INBOX ────────────────────────────────────────────────────
 
     @GetMapping("/me")
     public ResponseEntity<List<AnnouncementResponse>> getMyInbox(
@@ -77,8 +71,6 @@ public class AnnouncementController {
         }
         return ResponseEntity.ok().build();
     }
-
-    // ── MARK SINGLE AS READ ──────────────────────────────────────────────
 
     @PatchMapping("/student-recipients/{recipientId}/read")
     public ResponseEntity<Void> markStudentRead(@PathVariable Long recipientId) {

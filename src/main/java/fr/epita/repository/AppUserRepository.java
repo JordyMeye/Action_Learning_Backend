@@ -14,15 +14,11 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     boolean existsByEmail(String email);
     boolean existsByRole(Role role);
 
-    /** All non-deleted users with the given role (used by SuperAdminService). */
     List<AppUser> findByRoleAndDeletedFalse(Role role);
 
-    /** All non-deleted users whose role is in the given list (used to list all admin users). */
     List<AppUser> findByRoleInAndDeletedFalse(List<Role> roles);
 
-    /** Fetch a single non-deleted user by id (used for block/unblock/delete). */
     Optional<AppUser> findByIdAndDeletedFalse(Long id);
 
-    /** Find the first admin user for a given university (used to derive the university email domain). */
     Optional<AppUser> findFirstByUniversityIdAndRole(Long universityId, Role role);
 }

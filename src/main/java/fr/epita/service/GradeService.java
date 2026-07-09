@@ -69,7 +69,6 @@ public class GradeService {
                         .student(student)
                         .build());
 
-        // Row 111 — editing an already-RELEASED grade keeps it released and notifies the student.
         boolean wasReleased = grade.getId() != null && grade.getStatus() == GradeStatus.RELEASED;
 
         grade.setGrade(request.getGrade());
@@ -91,22 +90,20 @@ public class GradeService {
         Submission submission = findSubmission(submissionId);
         List<StudentGrade> grades = studentGradeRepository.findBySubmissionId(submissionId);
 
-        // Row 110 — only newly released grades trigger a "grade released" notification.
         Instant now = Instant.now();
-        List<StudentGrade> newlyReleased = new ArrayList<>();
+        List<StudentGrade> releasedGrades = new ArrayList<>();
         for (StudentGrade grade : grades) {
-            if (grade.getStatus() != GradeStatus.RELEASED) {
-                grade.setStatus(GradeStatus.RELEASED);
-                grade.setReleasedAt(now);
-                newlyReleased.add(grade);
-            }
+            boolean isNewlyReleased = grade.getStatus() != GradeStatus.RELEASED;
+            grade.setStatus(GradeStatus.RELEASED);
+            grade.setReleasedAt(now);
+            releasedGrades.add(grade);
         }
         List<GradeResponse> result = studentGradeRepository.saveAll(grades)
                 .stream()
                 .map(this::toResponse)
                 .toList();
 
-        for (StudentGrade grade : newlyReleased) {
+        for (StudentGrade grade : releasedGrades) {
             notificationService.notifyStudent(grade.getStudent(), submission, NotificationType.GRADE_RELEASED,
                     "Your grade for \"" + submission.getTitle() + "\" has been released: "
                             + fmt(grade.getGrade()) + " / " + submission.getMaxPoints() + ".");

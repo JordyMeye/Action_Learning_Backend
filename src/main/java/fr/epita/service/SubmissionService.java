@@ -55,13 +55,6 @@ public class SubmissionService {
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
-    /**
-     * @param courseId     when set, assignments of a single course
-     * @param lecturerId   when set, assignments a lecturer owns
-     * @param universityId when set, all assignments in a university (course -> programme -> university)
-     * @param programmeId  when set, all assignments of a programme (student view)
-     * @param studentView  when true, only PUBLISHED assignments are returned (drafts/archived hidden).
-     */
     public List<SubmissionResponse> getAll(Long courseId, Long lecturerId, Long universityId,
                                            Long programmeId, boolean studentView) {
         List<Submission> submissions;
@@ -88,7 +81,6 @@ public class SubmissionService {
 
     @Transactional
     public SubmissionResponse create(CreateSubmissionRequest request) {
-        // Support "one or more courses": create one assignment per selected course.
         List<Long> courseIds = (request.getCourseIds() != null && !request.getCourseIds().isEmpty())
                 ? request.getCourseIds()
                 : List.of(request.getCourseId());
@@ -108,7 +100,6 @@ public class SubmissionService {
                 throw new IllegalStateException("Course \"" + course.getName() + "\" is archived");
             }
 
-            // Default the assignment's lecturer to the course's teaching lecturer when not supplied.
             Long lecturerId = request.getLecturerId() != null
                     ? request.getLecturerId()
                     : (course.getLecturer() != null ? course.getLecturer().getId() : null);
@@ -133,7 +124,7 @@ public class SubmissionService {
 
             if (status == SubmissionStatus.PUBLISHED) {
                 notificationService.notifyCourseStudents(saved, NotificationType.NEW_SUBMISSION,
-                        "New assignment: \"" + saved.getTitle() + "\" — due " + saved.deadline() + ".");
+                        "New assignment: \"" + saved.getTitle() + "\"  due " + saved.deadline() + ".");
             }
             created.add(saved);
         }
@@ -178,7 +169,7 @@ public class SubmissionService {
 
         if (uploadRepository.countBySubmissionId(saved.getId()) > 0) {
             notificationService.notifyCourseStudents(saved, NotificationType.ASSIGNMENT_EDITED,
-                    "Assignment updated: \"" + saved.getTitle() + "\". The instructions changed — please review.");
+                    "Assignment updated: \"" + saved.getTitle() + "\". The instructions changed  please review.");
             saved.setLastNotifiedAt(Instant.now());
             saved = submissionRepository.save(saved);
         }
@@ -191,7 +182,7 @@ public class SubmissionService {
         submission.setStatus(SubmissionStatus.PUBLISHED);
         Submission saved = submissionRepository.save(submission);
         notificationService.notifyCourseStudents(saved, NotificationType.NEW_SUBMISSION,
-                "New assignment: \"" + saved.getTitle() + "\" — due " + saved.deadline() + ".");
+                "New assignment: \"" + saved.getTitle() + "\"  due " + saved.deadline() + ".");
         return toResponse(saved);
     }
 
@@ -220,7 +211,6 @@ public class SubmissionService {
             throw new IllegalStateException(
                     "This assignment has student submissions and can only be archived, not deleted.");
         }
-        // Delete related data before deleting the submission
         notificationRepository.deleteBySubmissionId(submission.getId());
         studentGradeRepository.deleteBySubmissionId(submission.getId());
         submissionRepository.delete(submission);
@@ -238,7 +228,7 @@ public class SubmissionService {
         Submission submission = find(id);
         notificationService.notifyNonSubmitters(submission, NotificationType.MANUAL,
                 "Reminder from your lecturer: you have not submitted \"" + submission.getTitle()
-                        + "\" yet — it is due " + submission.deadline() + ".");
+                        + "\" yet  it is due " + submission.deadline() + ".");
         submission.setLastNotifiedAt(Instant.now());
         return toResponse(submissionRepository.save(submission));
     }
@@ -274,11 +264,7 @@ public class SubmissionService {
         return submissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Submission not found"));
     }
-
-    /**
-     * Get the Lecturer ID for a given email address.
-     * Used to ensure lecturers can only see their own submissions.
-     */
+    
     public Long getLecturerIdByEmail(String email) {
         return lecturerRepository.findByEmail(email)
                 .map(Lecturer::getId)

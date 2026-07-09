@@ -18,9 +18,8 @@ public class TenantSummaryResponse {
     private long totalCohorts;
     private long activeCohorts;
 
-    private long totalSubmissions;   // assignments created for this tenant's cohorts
-    private long releasedGrades;     // StudentGrade rows with status RELEASED
-    private long gradedThisMonth;    // released grades whose gradedAt falls in the current month
-
-    private double avgScorePct;      // mean of (grade / maxPoints * 100) over released grades; 0 if none
+    private long totalSubmissions;   
+    private long releasedGrades;      
+    private long gradedThisMonth;    
+    private double avgScorePct;      
 }

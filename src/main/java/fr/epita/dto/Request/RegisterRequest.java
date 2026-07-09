@@ -27,6 +27,5 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    // Nullable: unauthenticated callers omit this; authenticated admins supply it.
     private Role role;
 }

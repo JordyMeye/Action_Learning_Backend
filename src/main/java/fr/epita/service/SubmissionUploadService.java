@@ -52,7 +52,6 @@ public class SubmissionUploadService {
     public ComplianceReportResponse processUpload(
             Submission submission, Student student, MultipartFile file) throws IOException {
 
-        // Enforce deadline (row 99) — reject uploads past deadline unless lecturer reopened.
         if (LocalDateTime.now().isAfter(submission.deadline())) {
             boolean reopened = submission.getReopenedStudentIds() != null
                     && submission.getReopenedStudentIds().contains(student.getId());
@@ -64,7 +63,6 @@ public class SubmissionUploadService {
 
         String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "unknown";
 
-        // Enforce the maximum file size (row 64) before anything else.
         if (submission.getRules() != null
                 && submission.getRules().getMaxFileSizeBytes() != null
                 && file.getSize() > submission.getRules().getMaxFileSizeBytes()) {
@@ -99,15 +97,12 @@ public class SubmissionUploadService {
         SubmissionUpload saved = uploadRepository.save(upload);
         report.setUploadId(saved.getId());
 
-        // Persist the structured report so students can see failure reasons after page refresh.
         try {
             saved.setComplianceReportJson(objectMapper.writeValueAsString(report));
             uploadRepository.save(saved);
         } catch (Exception ignored) {
-            // Non-critical: report is still returned in the response right now.
         }
 
-        // Run NLP scoring only for compliant documents; store per-criterion feedback.
         if (report.isOverallPass()) {
             try {
                 ScoringReportResponse scoring = aiServiceClient.score(file);
@@ -132,7 +127,6 @@ public class SubmissionUploadService {
             throw new IllegalStateException("Cannot turn in a document that failed compliance checks.");
         if (Boolean.TRUE.equals(upload.getTurnedIn()))
             throw new IllegalStateException("Document already turned in.");
-        // Enforce deadline (row 99).
         Submission submission = upload.getSubmission();
         if (LocalDateTime.now().isAfter(submission.deadline())) {
             boolean reopened = submission.getReopenedStudentIds() != null
@@ -147,11 +141,6 @@ public class SubmissionUploadService {
         uploadRepository.save(upload);
     }
 
-    /**
-     * Row 74/75 — the turned-in submissions for an assignment, each enriched with
-     * status (SUBMITTED/LATE), the uploadId for download, and the re-open flag.
-     * Students who have not submitted are derived on the client from the cohort roster.
-     */
     @Transactional
     public List<StudentSubmissionResponse> getStudentSubmissions(Submission submission) {
         var reopened = submission.getReopenedStudentIds() != null
@@ -194,13 +183,11 @@ public class SubmissionUploadService {
         }
     }
 
-    /** Loads a single upload (for a lecturer download); row 75. */
     public SubmissionUpload getUploadForDownload(Long uploadId) {
         return uploadRepository.findById(uploadId)
                 .orElseThrow(() -> new EntityNotFoundException("Upload not found"));
     }
 
-    /** All turned-in uploads for a submission (used to build the ZIP); row 76. */
     public List<SubmissionUpload> getTurnedInUploads(Long submissionId) {
         return uploadRepository.findBySubmissionIdAndTurnedInTrue(submissionId);
     }
@@ -255,7 +242,6 @@ public class SubmissionUploadService {
                         .build());
     }
 
-    /** Stores a template/brief file for an assignment and records it on the submission (row 68). */
     @Transactional
     public void storeTemplate(Submission submission, MultipartFile file) throws IOException {
         String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "template";
@@ -269,12 +255,10 @@ public class SubmissionUploadService {
         submissionRepository.save(submission);
     }
 
-    /** Reads raw bytes from a stored path (template or a student upload). */
     public byte[] readBytes(String storedPath) throws IOException {
         return Files.readAllBytes(Paths.get(storedPath));
     }
 
-    /** Builds a ZIP of every turned-in submission file for an assignment (row 76). */
     public byte[] buildSubmissionsZip(Long submissionId) throws IOException {
         List<SubmissionUpload> uploads = uploadRepository.findBySubmissionIdAndTurnedInTrue(submissionId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -16,7 +16,6 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
 
     long countBySessionIdAndStatus(Long sessionId, AttendanceStatus status);
 
-    // For student/admin stats: all records for a student within a specific cohort's sessions
     @Query("SELECT r FROM AttendanceRecord r " +
            "WHERE r.student.id = :studentId " +
            "AND r.session.cohort.id = :cohortId")
@@ -24,7 +23,6 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
             @Param("studentId") Long studentId,
             @Param("cohortId") Long cohortId);
 
-    // Count total sessions that have at least one record (used for stats denominator)
     @Query("SELECT COUNT(DISTINCT r.session.id) FROM AttendanceRecord r " +
            "WHERE r.student.id = :studentId AND r.session.cohort.id = :cohortId")
     long countDistinctSessionsByStudentAndCohort(

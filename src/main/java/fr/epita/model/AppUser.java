@@ -39,19 +39,16 @@ public class AppUser {
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private Role role;
 
-    /** false = account can log in; true = login blocked by admin */
     @Builder.Default
     @ColumnDefault("false")
     @Column(nullable = false)
     private boolean blocked = false;
 
-    /** false = visible and active; true = soft-deleted (hidden from UI, preserved in DB) */
     @Builder.Default
     @ColumnDefault("false")
     @Column(nullable = false)
     private boolean deleted = false;
 
-    /** Null for SUPER_ADMIN and PLATFORM_ADMIN; set for ROLE_UNI_ADMIN, ROLE_LECTURER, ROLE_STUDENT */
     @Column(name = "university_id")
     private Long universityId;
 }

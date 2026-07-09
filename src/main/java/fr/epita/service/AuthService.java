@@ -55,7 +55,6 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        // Deactivated / suspended accounts cannot log in. Distinct exception → 403 with a clear message.
         if (user.isBlocked()) {
             throw new DisabledException("Your account has been deactivated. Please contact your administrator.");
         }
@@ -76,11 +75,6 @@ public class AuthService {
         appUserRepository.save(user);
     }
 
-    /**
-     * Bootstrap rule:
-     *   - No valid JWT → caller is anonymous → only ROLE_UNI_ADMIN may be provisioned.
-     *   - Valid JWT with ROLE_UNI_ADMIN → any role the request specifies (defaults to ROLE_STUDENT).
-     */
     private Role resolveRole(Role requested) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -94,7 +88,6 @@ public class AuthService {
             return requested != null ? requested : Role.ROLE_STUDENT;
         }
 
-        // Unauthenticated: bootstrap path — only ROLE_UNI_ADMIN is permitted
         if (requested != null && requested != Role.ROLE_UNI_ADMIN) {
             throw new IllegalStateException("Only ROLE_UNI_ADMIN can be registered without authentication");
         }

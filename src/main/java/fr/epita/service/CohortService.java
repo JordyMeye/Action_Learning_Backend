@@ -19,10 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A Cohort is an INTAKE SEASON (e.g. "Spring 2026"), university-wide. Programmes are attached
- * to it via a many-to-many relationship (owned by Programme.cohorts).
- */
 @Service
 @RequiredArgsConstructor
 public class CohortService {
@@ -77,7 +73,6 @@ public class CohortService {
         return toResponse(saved);
     }
 
-    /** Derives "Spring 2026" from season + year when no explicit name is provided. */
     private String resolveName(CreateCohortRequest request) {
         if (request.getName() != null && !request.getName().isBlank()) {
             return request.getName().trim();
@@ -86,22 +81,16 @@ public class CohortService {
         return seasonLabel + " " + request.getAcademicYear();
     }
 
-    /**
-     * Reconciles the programmes attached to this cohort. The join table is owned by
-     * Programme.cohorts, so we mutate from the programme side.
-     */
     private void setProgrammes(Cohort cohort, List<Long> programmeIds) {
         List<Long> desiredIds = programmeIds != null ? programmeIds : new ArrayList<>();
         List<Programme> current = programmeRepository.findByCohorts_Id(cohort.getId());
 
-        // Detach programmes no longer selected.
         for (Programme p : current) {
             if (!desiredIds.contains(p.getId())) {
                 p.getCohorts().removeIf(c -> c.getId().equals(cohort.getId()));
                 programmeRepository.save(p);
             }
         }
-        // Attach newly selected programmes.
         for (Long pid : desiredIds) {
             Programme p = programmeRepository.findById(pid)
                     .orElseThrow(() -> new EntityNotFoundException("Programme not found: " + pid));

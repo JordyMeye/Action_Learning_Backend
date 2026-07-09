@@ -16,6 +16,5 @@ public class CreateCourseRequest {
     @NotNull
     private Long semesterId;
 
-    /** Optional teaching lecturer. */
     private Long lecturerId;
 }

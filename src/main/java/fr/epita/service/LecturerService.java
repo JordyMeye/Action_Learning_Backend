@@ -45,11 +45,9 @@ public class LecturerService {
     @Transactional
     public LecturerResponse create(CreateLecturerRequest request, Long universityId) {
         String lecturerRef = generateLecturerRef();
-        // The form email (if provided) is the PERSONAL email — only the recipient of the credentials.
         String personalEmail = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : null;
         List<Programme> programmes = resolveProgrammes(request.getProgrammeIds());
 
-        // Professional login email: surname-firstname@<university-domain>, numeric suffix on collision.
         String domain = resolveDomain(programmes);
         String professionalEmail = generateProfessionalEmail(request.getLastName(), request.getFirstName(), domain);
 
@@ -102,7 +100,6 @@ public class LecturerService {
         return sb.toString();
     }
 
-    /** surname-firstname@domain, lowercased; appends a numeric suffix on collision. */
     private String generateProfessionalEmail(String surname, String firstName, String domain) {
         String local = sanitize(surname) + "-" + sanitize(firstName);
         String candidate = local + "@" + domain;
@@ -116,7 +113,6 @@ public class LecturerService {
         return s == null ? "" : s.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
     }
 
-    /** University email domain from the lecturer's programmes; falls back to a code-based domain. */
     private String resolveDomain(List<Programme> programmes) {
         return programmes.stream()
                 .map(Programme::getUniversity)
@@ -142,8 +138,6 @@ public class LecturerService {
 
         lecturer.setFirstName(request.getFirstName());
         lecturer.setLastName(request.getLastName());
-        // The professional login email and lecturer ref are fixed at creation and must never
-        // change on edit (login identity / stable reference). Only name and phone are editable.
         if (request.getPhone() != null) {
             lecturer.setPhone(request.getPhone());
         }
@@ -156,7 +150,6 @@ public class LecturerService {
         }
 
         Lecturer saved = lecturerRepository.save(lecturer);
-        // Keep the login in sync: a deactivated lecturer cannot log in.
         appUserRepository.findByEmail(saved.getEmail()).ifPresent(u -> {
             u.setBlocked(saved.getStatus() != LecturerStatus.ACTIVE);
             appUserRepository.save(u);

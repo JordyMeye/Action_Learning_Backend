@@ -17,7 +17,6 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // ── Student /me endpoints (auth-based, no studentId in URL) ──
 
     @GetMapping("/notifications/me")
     public ResponseEntity<List<NotificationResponse>> getMyNotifications(
@@ -42,8 +41,6 @@ public class NotificationController {
     public ResponseEntity<NotificationResponse> markRead(@PathVariable Long id) {
         return ResponseEntity.ok(notificationService.markRead(id));
     }
-
-    // ── Admin / lecturer endpoints (studentId in URL) ──
 
     @GetMapping("/students/{studentId}/notifications")
     public ResponseEntity<List<NotificationResponse>> getForStudent(@PathVariable Long studentId) {

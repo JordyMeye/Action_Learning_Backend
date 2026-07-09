@@ -22,12 +22,7 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String fromAddress;
 
-    /**
-     * @param toEmail       adminContactEmail — where the email lands
-     * @param firstName     used in the greeting
-     * @param platformEmail generated login email (firstname.lastname@domain)
-     * @param tempPassword  one-time password the admin must change on first login
-     */
+    
     @Async
     public void sendApprovalEmail(String toEmail, String firstName, String platformEmail, String tempPassword) {
         log.info("Sending approval email to {} (platform login: {})", toEmail, platformEmail);
@@ -61,7 +56,6 @@ public class EmailService {
              buildRejectionBody(firstName, reason));
     }
 
-    /** Sent to a student when a lecturer notifies the cohort  */
     @Async
     public void sendNotificationEmail(String toEmail, String firstName, String subject, String message) {
         log.info("Sending notification email to {}", toEmail);
@@ -79,12 +73,10 @@ public class EmailService {
             mailSender.send(message);
             log.info("Email successfully sent to {}", to);
         } catch (MessagingException | MailException e) {
-            // Log the error — do NOT rethrow. Email failure must not roll back the DB transaction.
             log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
         }
     }
 
-    // ---- One named builder per email type; all compose from the shared blocks below. ----
 
     private String buildApprovalBody(String firstName, String platformEmail, String tempPassword) {
         return layout("Welcome to the Action Learning Platform",
@@ -133,9 +125,7 @@ public class EmailService {
               + "<p>Log in to the Action Learning Platform to view the details.</p>");
     }
 
-    // ---- Shared building blocks (edit once, every email updates) ----
 
-    /** Wraps inner HTML in the shared ALC email shell: heading at the top, footer at the bottom. */
     private String layout(String heading, String innerHtml) {
         return """
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -152,7 +142,6 @@ public class EmailService {
         return "<p>Dear " + firstName + ",</p>";
     }
 
-    /** Login-credentials box plus the mandatory "change your password" notice. */
     private String credentialsBlock(String loginEmail, String tempPassword) {
         return """
                 <div style="background: #f4f6f7; border-left: 4px solid #2E5F9E; padding: 16px; margin: 24px 0; border-radius: 4px;">
