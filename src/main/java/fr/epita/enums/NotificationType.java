@@ -8,5 +8,7 @@ public enum NotificationType {
     GRADE_UPDATED,
     REMINDER_24H,
     REMINDER_12H,
-    REMINDER_1H
+    REMINDER_1H,
+    PAYMENT_COMPLETED,
+    PAYMENT_FAILED
 }
