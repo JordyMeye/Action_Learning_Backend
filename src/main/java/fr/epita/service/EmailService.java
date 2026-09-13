@@ -4,14 +4,13 @@ import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Email;
 import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
 
@@ -72,13 +71,6 @@ public class EmailService {
     public void sendNotificationEmail(String toEmail, String firstName, String subject, String message) {
         log.info("Sending notification email to {}", toEmail);
         send(toEmail, subject, buildNotificationBody(firstName, message));
-    }
-
-    /** Sent to a student when the payment service reports the outcome of a payment. */
-    @Async
-    public void sendPaymentEmail(String toEmail, String firstName, String subject, String message) {
-        log.info("Sending payment email to {}", toEmail);
-        send(toEmail, subject, buildPaymentBody(firstName, message));
     }
 
     private void send(String to, String subject, String htmlBody) {
@@ -155,13 +147,6 @@ public class EmailService {
                 greeting(firstName)
                         + "<p>" + message + "</p>"
                         + "<p>Log in to the Action Learning Platform to view the details.</p>");
-    }
-
-    private String buildPaymentBody(String firstName, String message) {
-        return layout("Payment Update",
-                greeting(firstName)
-                        + "<p>" + HtmlUtils.htmlEscape(message) + "</p>"
-                        + "<p>Log in to the Action Learning Platform to view your payment history.</p>");
     }
 
     // ---- Shared building blocks (edit once, every email updates) ----
