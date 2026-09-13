@@ -143,6 +143,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Kafka: consumes payment events published by payment-service -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
 
     </dependencies>
 

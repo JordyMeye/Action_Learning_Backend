@@ -48,6 +48,23 @@ public class NotificationService {
         }
     }
 
+    /** Notifies (in-app + email) a student about a payment outcome reported by the payment service. */
+    @Transactional
+    public void notifyStudentOfPayment(Student student, NotificationType type, String message) {
+        notificationRepository.save(Notification.builder()
+                .student(student)
+                .type(type)
+                .message(message)
+                .readFlag(false)
+                .build());
+        if (student.getEmail() != null && !student.getEmail().isBlank()) {
+            String subject = type == NotificationType.PAYMENT_COMPLETED
+                    ? "Action Learning Platform — Payment received"
+                    : "Action Learning Platform — Payment failed";
+            emailService.sendPaymentEmail(student.getEmail(), student.getFirstName(), subject, message);
+        }
+    }
+
     /** Row 113 — notifies only course students who have NOT turned in this submission. Returns how many. */
     @Transactional
     public int notifyNonSubmitters(Submission submission, NotificationType type, String message) {
